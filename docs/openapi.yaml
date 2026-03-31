@@ -1,0 +1,369 @@
+openapi: 3.0.3
+info:
+  title: Draft Analysis API Specification
+  description: API documentation for the Draft Analysis bounded context.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: Development Server
+tags:
+  - name: DraftAnalysis
+    description: Operations related to the DraftAnalysis bounded context.
+paths:
+  /analyze-draft:
+    post:
+      summary: Analyze Draft
+      description: Executes the "Analyze Draft" command.
+      operationId: analyzeDraft
+      tags:
+        - DraftAnalysis
+      responses:
+        '200':
+          description: 'OK: The resource was updated successfully.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeroRecommendation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeDraftRequest'
+  /get-all-herorecommendations/{draftStateId}:
+    get:
+      summary: Get All HeroRecommendations
+      description: Retrieves data based on the "Get All HeroRecommendations" query. This is a synchronous query operation.
+      operationId: getAllHeroRecommendations
+      tags:
+        - DraftAnalysis
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetAllHeroRecommendationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      parameters:
+        - in: path
+          name: draftStateId
+          required: true
+          schema:
+            type: string
+  /get-draftscreenshot-by-id/{id}:
+    get:
+      summary: Get DraftScreenshot by ID
+      description: Retrieves data based on the "Get DraftScreenshot by ID" query. This is a synchronous query operation.
+      operationId: getDraftScreenshotByID
+      tags:
+        - DraftAnalysis
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftScreenshot'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+  /parse-draft:
+    post:
+      summary: Parse Draft
+      description: Executes the "Parse Draft" command.
+      operationId: parseDraft
+      tags:
+        - DraftAnalysis
+      responses:
+        '200':
+          description: 'OK: The resource was updated successfully.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParseDraftRequest'
+  /upload-screenshot:
+    post:
+      summary: Upload Screenshot
+      description: Executes the "Upload Screenshot" command.
+      operationId: uploadScreenshot
+      tags:
+        - DraftAnalysis
+      responses:
+        '200':
+          description: 'OK: The resource was updated successfully.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftScreenshot'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadScreenshotRequest'
+components:
+  schemas:
+    AnalyzeDraftRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          example: rec-001
+        draftStateId:
+          type: string
+          example: ds-001
+        heroName:
+          type: string
+          example: Earthshaker
+        reasoning:
+          type: string
+          example: Strong AoE counter to PL illusions
+        confidence:
+          type: number
+          example: '92'
+        role:
+          type: string
+          example: carry
+      required:
+        - draftStateId
+        - heroName
+        - reasoning
+        - confidence
+        - role
+    DraftScreenshot:
+      type: object
+      description: Represents a DraftScreenshot in the system.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the DraftScreenshot.
+          example: ss-001
+        imageUrl:
+          type: string
+          description: The imageUrl of the DraftScreenshot.
+          example: https://storage.dotahub.com/ss-001.png
+        uploadedAt:
+          type: string
+          description: The uploadedAt of the DraftScreenshot.
+          example: '2026-03-31T10:00:00Z'
+        status:
+          type: string
+          description: The status of the DraftScreenshot.
+          example: pending
+      required:
+        - id
+        - imageUrl
+        - uploadedAt
+        - status
+    DraftState:
+      type: object
+      description: Represents a DraftState in the system.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the DraftState.
+          example: ds-001
+        screenshotId:
+          type: string
+          description: The screenshotId of the DraftState.
+          example: ss-001
+        alliedPicks:
+          type: string
+          description: The alliedPicks of the DraftState.
+          example: '["Anti-Mage", "Crystal Maiden"]'
+        enemyPicks:
+          type: string
+          description: The enemyPicks of the DraftState.
+          example: '["Phantom Lancer", "Dazzle"]'
+        bans:
+          type: string
+          description: The bans of the DraftState.
+          example: '["Morphling", "Faceless Void"]'
+        pickPhase:
+          type: string
+          description: The pickPhase of the DraftState.
+          example: first_pick
+        userTeam:
+          type: string
+          description: The userTeam of the DraftState.
+          example: radiant
+      required:
+        - id
+        - screenshotId
+        - pickPhase
+        - userTeam
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: An error occurred.
+    GetAllHeroRecommendationsResponse:
+      type: object
+      description: Response schema for the Get All HeroRecommendations query.
+      properties:
+        draftStateId:
+          type: string
+          description: Reference to the analyzed draft
+          example: ds-001
+        heroName:
+          type: string
+          description: Recommended hero name
+          example: Earthshaker
+        reasoning:
+          type: string
+          description: LLM explanation for why this hero is a good pick
+          example: Strong AoE counter to PL illusions
+        confidence:
+          type: number
+          description: Confidence score 0-100
+          example: '92'
+        role:
+          type: string
+          description: Suggested role for the hero
+          example: carry
+    HeroRecommendation:
+      type: object
+      description: Represents a HeroRecommendation in the system.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the HeroRecommendation.
+          example: rec-001
+        draftStateId:
+          type: string
+          description: The draftStateId of the HeroRecommendation.
+          example: ds-001
+        heroName:
+          type: string
+          description: The heroName of the HeroRecommendation.
+          example: Earthshaker
+        reasoning:
+          type: string
+          description: The reasoning of the HeroRecommendation.
+          example: Strong AoE counter to PL illusions
+        confidence:
+          type: number
+          description: The confidence of the HeroRecommendation.
+          example: '92'
+        role:
+          type: string
+          description: The role of the HeroRecommendation.
+          example: carry
+      required:
+        - id
+        - draftStateId
+        - heroName
+        - reasoning
+        - confidence
+        - role
+    ParseDraftRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          example: ds-001
+        screenshotId:
+          type: string
+          example: ss-001
+        alliedPicks:
+          type: string
+          example: '["Anti-Mage", "Crystal Maiden"]'
+        enemyPicks:
+          type: string
+          example: '["Phantom Lancer", "Dazzle"]'
+        bans:
+          type: string
+          example: '["Morphling", "Faceless Void"]'
+        pickPhase:
+          type: string
+          example: first_pick
+        userTeam:
+          type: string
+          example: radiant
+      required:
+        - screenshotId
+        - pickPhase
+        - userTeam
+    UploadScreenshotRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          example: ss-001
+        imageUrl:
+          type: string
+          example: https://storage.dotahub.com/ss-001.png
+        uploadedAt:
+          type: string
+          example: '2026-03-31T10:00:00Z'
+        status:
+          type: string
+          example: pending
+      required:
+        - imageUrl
+  parameters:
+    DraftScreenshotId:
+      name: id
+      in: path
+      required: true
+      description: The unique identifier for the DraftScreenshot.
+      schema:
+        type: string
+    DraftStateId:
+      name: id
+      in: path
+      required: true
+      description: The unique identifier for the DraftState.
+      schema:
+        type: string
+    HeroRecommendationId:
+      name: id
+      in: path
+      required: true
+      description: The unique identifier for the HeroRecommendation.
+      schema:
+        type: string
+  responses:
+    BadRequest:
+      description: 'Bad Request: The server cannot or will not process the request due to something that is perceived to be a client error.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: 'Internal Server Error: The server has encountered a situation it doesn''t know how to handle.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 'Not Found: The server can not find the requested resource.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+

@@ -1,0 +1,438 @@
+{
+  "$schema": "https://app.qlerify.com/schemas/domain-model/v1.json",
+  "version": 1,
+  "boundedContext": "Draft Analysis",
+  "roles": [
+    "User",
+    "System"
+  ],
+  "domainEvents": {
+    "ScreenshotUploaded": {
+      "event": "Screenshot Uploaded",
+      "role": "User",
+      "follows": [
+        "start"
+      ],
+      "command": {
+        "$ref": "#/schemas/commands/UploadScreenshot"
+      },
+      "aggregateRoot": {
+        "$ref": "#/schemas/entities/DraftScreenshot"
+      },
+      "readModels": [
+        {
+          "$ref": "#/schemas/queries/GetScreenshotStatus"
+        }
+      ],
+      "acceptanceCriteria": [
+        "Given a user is on the upload page, When they upload a draft screenshot, Then the screenshot is stored and processing begins"
+      ]
+    },
+    "DraftParsed": {
+      "event": "Draft Parsed",
+      "role": "System",
+      "group": "Analysis",
+      "follows": [
+        {
+          "$ref": "#/domainEvents/ScreenshotUploaded"
+        }
+      ],
+      "command": {
+        "$ref": "#/schemas/commands/ParseDraft"
+      },
+      "aggregateRoot": {
+        "$ref": "#/schemas/entities/DraftState"
+      },
+      "acceptanceCriteria": [
+        "Given a screenshot has been uploaded, When the system processes it via LLM vision, Then allied picks, enemy picks, bans, pick phase, and user team are extracted"
+      ]
+    },
+    "DraftAnalyzed": {
+      "event": "Draft Analyzed",
+      "role": "System",
+      "follows": [
+        {
+          "$ref": "#/domainEvents/DraftParsed"
+        }
+      ],
+      "command": {
+        "$ref": "#/schemas/commands/AnalyzeDraft"
+      },
+      "aggregateRoot": {
+        "$ref": "#/schemas/entities/HeroRecommendation"
+      },
+      "readModels": [
+        {
+          "$ref": "#/schemas/queries/GetRecommendationsByDraft",
+          "array": true
+        }
+      ],
+      "acceptanceCriteria": [
+        "Given the draft state has been parsed, When the system analyzes counters, synergies, and meta data, Then hero recommendations with reasoning and confidence scores are generated"
+      ]
+    }
+  },
+  "schemas": {
+    "commands": {
+      "UploadScreenshot": {
+        "required": [
+          "imageUrl"
+        ],
+        "fields": [
+          {
+            "name": "id",
+            "hideInForm": true
+          },
+          {
+            "name": "imageUrl",
+            "hideInForm": false
+          },
+          {
+            "name": "uploadedAt",
+            "hideInForm": true
+          },
+          {
+            "name": "status",
+            "hideInForm": true
+          }
+        ]
+      },
+      "ParseDraft": {
+        "required": [
+          "screenshotId",
+          "pickPhase",
+          "userTeam"
+        ],
+        "fields": [
+          {
+            "name": "id",
+            "hideInForm": true
+          },
+          {
+            "name": "screenshotId",
+            "hideInForm": false
+          },
+          {
+            "name": "alliedPicks",
+            "hideInForm": false
+          },
+          {
+            "name": "enemyPicks",
+            "hideInForm": false
+          },
+          {
+            "name": "bans",
+            "hideInForm": false
+          },
+          {
+            "name": "pickPhase",
+            "hideInForm": false
+          },
+          {
+            "name": "userTeam",
+            "hideInForm": false
+          }
+        ]
+      },
+      "AnalyzeDraft": {
+        "required": [
+          "draftStateId",
+          "heroName",
+          "reasoning",
+          "confidence",
+          "role"
+        ],
+        "fields": [
+          {
+            "name": "id",
+            "hideInForm": true
+          },
+          {
+            "name": "draftStateId",
+            "hideInForm": false
+          },
+          {
+            "name": "heroName",
+            "hideInForm": false
+          },
+          {
+            "name": "reasoning",
+            "hideInForm": false
+          },
+          {
+            "name": "confidence",
+            "hideInForm": false
+          },
+          {
+            "name": "role",
+            "hideInForm": false
+          }
+        ]
+      }
+    },
+    "queries": {
+      "GetScreenshotStatus": {
+        "entity": {
+          "$ref": "#/schemas/entities/DraftScreenshot"
+        },
+        "fields": [
+          {
+            "name": "id",
+            "isFilter": true
+          },
+          {
+            "name": "imageUrl"
+          },
+          {
+            "name": "uploadedAt"
+          },
+          {
+            "name": "status"
+          }
+        ]
+      },
+      "GetRecommendationsByDraft": {
+        "entity": {
+          "$ref": "#/schemas/entities/HeroRecommendation"
+        },
+        "fields": [
+          {
+            "name": "draftStateId",
+            "isFilter": true
+          },
+          {
+            "name": "heroName"
+          },
+          {
+            "name": "reasoning"
+          },
+          {
+            "name": "confidence"
+          },
+          {
+            "name": "role"
+          }
+        ]
+      }
+    },
+    "entities": {
+      "DraftScreenshot": {
+        "required": [
+          "id",
+          "imageUrl",
+          "uploadedAt",
+          "status"
+        ],
+        "fields": [
+          {
+            "name": "id",
+            "description": "Unique identifier",
+            "exampleData": [
+              "ss-001",
+              "ss-002",
+              "ss-003"
+            ],
+            "dataType": "string"
+          },
+          {
+            "name": "imageUrl",
+            "description": "URL of the uploaded screenshot",
+            "exampleData": [
+              "https://storage.dotahub.com/ss-001.png",
+              "https://storage.dotahub.com/ss-002.png",
+              "https://storage.dotahub.com/ss-003.png"
+            ],
+            "dataType": "string"
+          },
+          {
+            "name": "uploadedAt",
+            "description": "Timestamp of upload",
+            "exampleData": [
+              "2026-03-31T10:00:00Z",
+              "2026-03-31T11:30:00Z",
+              "2026-03-31T14:15:00Z"
+            ],
+            "dataType": "string"
+          },
+          {
+            "name": "status",
+            "description": "Processing status",
+            "exampleData": [
+              "pending",
+              "processing",
+              "completed"
+            ],
+            "dataType": "string"
+          }
+        ]
+      },
+      "DraftState": {
+        "required": [
+          "id",
+          "screenshotId",
+          "pickPhase",
+          "userTeam"
+        ],
+        "fields": [
+          {
+            "name": "id",
+            "description": "Unique identifier",
+            "exampleData": [
+              "ds-001",
+              "ds-002",
+              "ds-003"
+            ],
+            "dataType": "string"
+          },
+          {
+            "name": "screenshotId",
+            "description": "Reference to the source screenshot",
+            "exampleData": [
+              "ss-001",
+              "ss-002",
+              "ss-003"
+            ],
+            "dataType": "string"
+          },
+          {
+            "name": "alliedPicks",
+            "description": "Heroes picked by the allied team (JSON array)",
+            "exampleData": [
+              "[\"Anti-Mage\", \"Crystal Maiden\"]",
+              "[\"Pudge\", \"Invoker\", \"Lion\"]",
+              "[\"Juggernaut\"]"
+            ],
+            "dataType": "string"
+          },
+          {
+            "name": "enemyPicks",
+            "description": "Heroes picked by the enemy team (JSON array)",
+            "exampleData": [
+              "[\"Phantom Lancer\", \"Dazzle\"]",
+              "[\"Storm Spirit\", \"Rubick\"]",
+              "[\"Medusa\", \"Treant Protector\", \"Mars\"]"
+            ],
+            "dataType": "string"
+          },
+          {
+            "name": "bans",
+            "description": "Banned heroes (JSON array)",
+            "exampleData": [
+              "[\"Morphling\", \"Faceless Void\"]",
+              "[\"Tinker\", \"Broodmother\"]",
+              "[\"Nature's Prophet\", \"Huskar\"]"
+            ],
+            "dataType": "string"
+          },
+          {
+            "name": "pickPhase",
+            "description": "Current phase of the draft",
+            "exampleData": [
+              "first_pick",
+              "second_pick",
+              "last_pick"
+            ],
+            "dataType": "string"
+          },
+          {
+            "name": "userTeam",
+            "description": "Which side the user is on",
+            "exampleData": [
+              "radiant",
+              "dire",
+              "radiant"
+            ],
+            "dataType": "string"
+          }
+        ]
+      },
+      "HeroRecommendation": {
+        "required": [
+          "id",
+          "draftStateId",
+          "heroName",
+          "reasoning",
+          "confidence",
+          "role"
+        ],
+        "fields": [
+          {
+            "name": "id",
+            "description": "Unique identifier",
+            "exampleData": [
+              "rec-001",
+              "rec-002",
+              "rec-003"
+            ],
+            "dataType": "string"
+          },
+          {
+            "name": "draftStateId",
+            "description": "Reference to the analyzed draft",
+            "exampleData": [
+              "ds-001",
+              "ds-002",
+              "ds-003"
+            ],
+            "dataType": "string"
+          },
+          {
+            "name": "heroName",
+            "description": "Recommended hero name",
+            "exampleData": [
+              "Earthshaker",
+              "Shadow Fiend",
+              "Witch Doctor"
+            ],
+            "dataType": "string"
+          },
+          {
+            "name": "reasoning",
+            "description": "LLM explanation for why this hero is a good pick",
+            "exampleData": [
+              "Strong AoE counter to PL illusions",
+              "High mid-game damage against squishy lineup",
+              "Good synergy with allied stun-heavy draft"
+            ],
+            "dataType": "string"
+          },
+          {
+            "name": "confidence",
+            "description": "Confidence score 0-100",
+            "exampleData": [
+              "92",
+              "85",
+              "78"
+            ],
+            "dataType": "number"
+          },
+          {
+            "name": "role",
+            "description": "Suggested role for the hero",
+            "exampleData": [
+              "carry",
+              "midlane",
+              "support"
+            ],
+            "dataType": "string"
+          }
+        ]
+      }
+    }
+  },
+  "groups": [
+    {
+      "name": "Upload",
+      "startSlotX": 0
+    },
+    {
+      "name": "Analysis",
+      "startSlotX": 1
+    },
+    {
+      "name": "Recommendation",
+      "startSlotX": 3
+    }
+  ],
+  "releases": []
+}
