@@ -19,10 +19,10 @@ export const useDraftAnalysis = () => {
     error: null,
   });
 
-  const analyze = async (userTeam: "radiant" | "dire", alliedPicks: string[], enemyPicks: string[]) => {
+  const analyze = async (userTeam: "radiant" | "dire", alliedPicks: string[], enemyPicks: string[], bans: string[]) => {
     try {
       setState((s) => ({ ...s, step: "submitting", error: null }));
-      const draftState = await submitDraft(userTeam, alliedPicks, enemyPicks);
+      const draftState = await submitDraft(userTeam, alliedPicks, enemyPicks, bans);
 
       setState((s) => ({ ...s, step: "analyzing", draftState }));
       const recommendations = await analyzeDraft(draftState.id);

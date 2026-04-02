@@ -194,10 +194,30 @@
 }
 
 .hero-pick-item.disabled {
-  opacity: 0.15;
+  opacity: 0.6;
   cursor: not-allowed;
   pointer-events: none;
-  filter: grayscale(1);
+  filter: grayscale(0.4) brightness(0.7);
+}
+
+.hero-pick-item.disabled::before,
+.hero-pick-item.disabled::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 110%;
+  height: 2px;
+  background: rgba(239, 68, 68, 0.7);
+  z-index: 3;
+}
+
+.hero-pick-item.disabled::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.hero-pick-item.disabled::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 .hero-pick-item img {

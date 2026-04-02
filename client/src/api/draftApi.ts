@@ -4,10 +4,11 @@ import { apiPost, apiGet } from "./client";
 export const submitDraft = (
   userTeam: "radiant" | "dire",
   alliedPicks: string[],
-  enemyPicks: string[]
+  enemyPicks: string[],
+  bans: string[]
 ): Promise<DraftState> => {
 
-  return apiPost<DraftState>("/submit-draft", { userTeam, alliedPicks, enemyPicks });
+  return apiPost<DraftState>("/submit-draft", { userTeam, alliedPicks, enemyPicks, bans });
 };
 
 export const analyzeDraft = (draftStateId: string): Promise<HeroRecommendation[]> => {

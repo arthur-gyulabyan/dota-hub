@@ -3,6 +3,7 @@ export interface DraftState {
   userTeam: "radiant" | "dire";
   alliedPicks: string[];
   enemyPicks: string[];
+  bans: string[];
 }
 
 export interface HeroRecommendation {

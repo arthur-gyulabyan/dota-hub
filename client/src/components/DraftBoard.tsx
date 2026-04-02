@@ -11,6 +11,7 @@ interface Props {
   direPicks: string[];
   onRadiantChange: (picks: string[]) => void;
   onDireChange: (picks: string[]) => void;
+  excludeHeroes?: string[];
   disabled?: boolean;
 }
 
@@ -21,11 +22,12 @@ export const DraftBoard = ({
   direPicks,
   onRadiantChange,
   onDireChange,
+  excludeHeroes = [],
   disabled,
 }: Props) => {
   const [pickerSlot, setPickerSlot] = useState<{ side: "radiant" | "dire"; index: number } | null>(null);
 
-  const allSelected = [...radiantPicks, ...direPicks];
+  const allSelected = [...radiantPicks, ...direPicks, ...excludeHeroes];
 
   const findHero = (name: string): Hero | undefined => {
 
@@ -106,13 +108,13 @@ export const DraftBoard = ({
     <>
       <div className="draft-board">
         <div className="draft-headers">
-          <div className="draft-team-header radiant">
+          <div className={`draft-team-header radiant ${userTeam === "radiant" ? "my-team" : ""}`}>
             <div className="draft-team-icon" />
             <span className="draft-team-label">Radiant</span>
             {userTeam === "radiant" && <span className="draft-team-you">You</span>}
           </div>
           <div className="draft-header-spacer" />
-          <div className="draft-team-header dire">
+          <div className={`draft-team-header dire ${userTeam === "dire" ? "my-team" : ""}`}>
             <div className="draft-team-icon" />
             <span className="draft-team-label">Dire</span>
             {userTeam === "dire" && <span className="draft-team-you">You</span>}

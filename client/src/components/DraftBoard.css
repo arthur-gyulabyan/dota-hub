@@ -50,12 +50,31 @@
 .draft-team-header.radiant .draft-team-label { color: var(--radiant); }
 .draft-team-header.dire .draft-team-label { color: var(--dire); }
 
+.draft-team-header.radiant.my-team .draft-team-label {
+  color: var(--radiant-bright);
+  text-shadow: 0 0 8px var(--radiant-glow), 0 0 20px var(--radiant-glow);
+}
+
+.draft-team-header.radiant.my-team .draft-team-icon {
+  box-shadow: 0 0 8px var(--radiant-glow), 0 0 20px var(--radiant-glow);
+}
+
+.draft-team-header.dire.my-team .draft-team-label {
+  color: var(--dire-bright);
+  text-shadow: 0 0 8px var(--dire-glow), 0 0 20px var(--dire-glow);
+}
+
+.draft-team-header.dire.my-team .draft-team-icon {
+  box-shadow: 0 0 8px var(--dire-glow), 0 0 20px var(--dire-glow);
+}
+
 .draft-team-you {
   font-family: 'Inter', sans-serif;
   font-size: 10px;
   font-weight: 500;
-  color: var(--text-muted);
-  background: rgba(255,255,255,0.04);
+  color: var(--gold);
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.2);
   padding: 2px 8px;
   border-radius: 10px;
   letter-spacing: 0.5px;

@@ -5,7 +5,7 @@ import { analyzeDraft } from "../services/draftAnalysisService.js";
 import { DraftState } from "../models/types.js";
 
 export const submitDraft = (req: Request, res: Response) => {
-  const { userTeam, alliedPicks, enemyPicks } = req.body;
+  const { userTeam, alliedPicks, enemyPicks, bans = [] } = req.body;
 
   if (!userTeam || !["radiant", "dire"].includes(userTeam)) {
     res.status(400).json({ message: "userTeam must be 'radiant' or 'dire'" });
@@ -27,6 +27,7 @@ export const submitDraft = (req: Request, res: Response) => {
     userTeam,
     alliedPicks,
     enemyPicks,
+    bans,
   };
 
   draftStates.set(draftState.id, draftState);

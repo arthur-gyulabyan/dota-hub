@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { DraftBoard } from "../components/DraftBoard";
+import { BansList } from "../components/BansList";
 import { RecommendationList } from "../components/RecommendationList";
 import { useDraftAnalysis } from "../hooks/useDraftAnalysis";
 import { useHeroes } from "../hooks/useHeroes";
@@ -11,21 +12,24 @@ export const HomePage = () => {
   const [userTeam, setUserTeam] = useState<"radiant" | "dire">("radiant");
   const [radiantPicks, setRadiantPicks] = useState<string[]>([]);
   const [direPicks, setDirePicks] = useState<string[]>([]);
+  const [bans, setBans] = useState<string[]>([]);
 
   const alliedPicks = userTeam === "radiant" ? radiantPicks : direPicks;
   const enemyPicks = userTeam === "radiant" ? direPicks : radiantPicks;
 
+  const allSelected = [...radiantPicks, ...direPicks, ...bans];
   const isProcessing = ["submitting", "analyzing"].includes(step);
   const canAnalyze = (radiantPicks.length > 0 || direPicks.length > 0) && !isProcessing;
 
   const handleAnalyze = () => {
-    analyze(userTeam, alliedPicks, enemyPicks);
+    analyze(userTeam, alliedPicks, enemyPicks, bans);
   };
 
   const handleReset = () => {
     reset();
     setRadiantPicks([]);
     setDirePicks([]);
+    setBans([]);
   };
 
   if (heroesLoading) {
@@ -85,9 +89,17 @@ export const HomePage = () => {
         direPicks={direPicks}
         onRadiantChange={setRadiantPicks}
         onDireChange={setDirePicks}
+        excludeHeroes={bans}
         disabled={isProcessing}
       />
 
+      <BansList
+        heroes={heroes}
+        bans={bans}
+        onChange={setBans}
+        excludeHeroes={allSelected}
+        disabled={isProcessing}
+      />
 
       <div className="action-area">
         {step === "done" ? (

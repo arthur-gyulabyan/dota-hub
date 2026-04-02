@@ -12,6 +12,7 @@ Draft State:
 - User's team: ${draftState.userTeam}
 - Allied picks: ${draftState.alliedPicks.join(", ") || "none yet"}
 - Enemy picks: ${draftState.enemyPicks.join(", ") || "none yet"}
+- Banned heroes: ${draftState.bans.join(", ") || "none"}
 
 Consider:
 1. Counter-picks against enemy heroes
@@ -19,6 +20,7 @@ Consider:
 3. Current meta viability
 4. Role balance (carry, mid, offlane, support)
 5. What roles are missing from the allied lineup
+6. Do NOT recommend any banned heroes
 
 Respond ONLY with valid JSON array (no markdown, no explanation):
 [
