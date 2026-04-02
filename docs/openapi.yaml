@@ -56,35 +56,11 @@ paths:
           required: true
           schema:
             type: string
-  /get-draftscreenshot-by-id/{id}:
-    get:
-      summary: Get DraftScreenshot by ID
-      description: Retrieves data based on the "Get DraftScreenshot by ID" query. This is a synchronous query operation.
-      operationId: getDraftScreenshotByID
-      tags:
-        - DraftAnalysis
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DraftScreenshot'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-  /parse-draft:
+  /submit-draft:
     post:
-      summary: Parse Draft
-      description: Executes the "Parse Draft" command.
-      operationId: parseDraft
+      summary: Submit Draft
+      description: Executes the "Submit Draft" command.
+      operationId: submitDraft
       tags:
         - DraftAnalysis
       responses:
@@ -101,29 +77,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ParseDraftRequest'
-  /upload-screenshot:
-    post:
-      summary: Upload Screenshot
-      description: Executes the "Upload Screenshot" command.
-      operationId: uploadScreenshot
-      tags:
-        - DraftAnalysis
-      responses:
-        '200':
-          description: 'OK: The resource was updated successfully.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DraftScreenshot'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UploadScreenshotRequest'
+              $ref: '#/components/schemas/SubmitDraftRequest'
 components:
   schemas:
     AnalyzeDraftRequest:
@@ -135,49 +89,8 @@ components:
         draftStateId:
           type: string
           example: ds-001
-        heroName:
-          type: string
-          example: Earthshaker
-        reasoning:
-          type: string
-          example: Strong AoE counter to PL illusions
-        confidence:
-          type: number
-          example: '92'
-        role:
-          type: string
-          example: carry
       required:
         - draftStateId
-        - heroName
-        - reasoning
-        - confidence
-        - role
-    DraftScreenshot:
-      type: object
-      description: Represents a DraftScreenshot in the system.
-      properties:
-        id:
-          type: string
-          description: Unique identifier for the DraftScreenshot.
-          example: ss-001
-        imageUrl:
-          type: string
-          description: The imageUrl of the DraftScreenshot.
-          example: https://storage.dotahub.com/ss-001.png
-        uploadedAt:
-          type: string
-          description: The uploadedAt of the DraftScreenshot.
-          example: '2026-03-31T10:00:00Z'
-        status:
-          type: string
-          description: The status of the DraftScreenshot.
-          example: pending
-      required:
-        - id
-        - imageUrl
-        - uploadedAt
-        - status
     DraftState:
       type: object
       description: Represents a DraftState in the system.
@@ -186,10 +99,10 @@ components:
           type: string
           description: Unique identifier for the DraftState.
           example: ds-001
-        screenshotId:
+        userTeam:
           type: string
-          description: The screenshotId of the DraftState.
-          example: ss-001
+          description: The userTeam of the DraftState.
+          example: radiant
         alliedPicks:
           type: string
           description: The alliedPicks of the DraftState.
@@ -198,23 +111,11 @@ components:
           type: string
           description: The enemyPicks of the DraftState.
           example: '["Phantom Lancer", "Dazzle"]'
-        bans:
-          type: string
-          description: The bans of the DraftState.
-          example: '["Morphling", "Faceless Void"]'
-        pickPhase:
-          type: string
-          description: The pickPhase of the DraftState.
-          example: first_pick
-        userTeam:
-          type: string
-          description: The userTeam of the DraftState.
-          example: radiant
       required:
         - id
-        - screenshotId
-        - pickPhase
         - userTeam
+        - alliedPicks
+        - enemyPicks
     Error:
       type: object
       properties:
@@ -280,59 +181,26 @@ components:
         - reasoning
         - confidence
         - role
-    ParseDraftRequest:
+    SubmitDraftRequest:
       type: object
       properties:
         id:
           type: string
           example: ds-001
-        screenshotId:
+        userTeam:
           type: string
-          example: ss-001
+          example: radiant
         alliedPicks:
           type: string
           example: '["Anti-Mage", "Crystal Maiden"]'
         enemyPicks:
           type: string
           example: '["Phantom Lancer", "Dazzle"]'
-        bans:
-          type: string
-          example: '["Morphling", "Faceless Void"]'
-        pickPhase:
-          type: string
-          example: first_pick
-        userTeam:
-          type: string
-          example: radiant
       required:
-        - screenshotId
-        - pickPhase
         - userTeam
-    UploadScreenshotRequest:
-      type: object
-      properties:
-        id:
-          type: string
-          example: ss-001
-        imageUrl:
-          type: string
-          example: https://storage.dotahub.com/ss-001.png
-        uploadedAt:
-          type: string
-          example: '2026-03-31T10:00:00Z'
-        status:
-          type: string
-          example: pending
-      required:
-        - imageUrl
+        - alliedPicks
+        - enemyPicks
   parameters:
-    DraftScreenshotId:
-      name: id
-      in: path
-      required: true
-      description: The unique identifier for the DraftScreenshot.
-      schema:
-        type: string
     DraftStateId:
       name: id
       in: path
