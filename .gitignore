@@ -41,6 +41,9 @@ Thumbs.db
 # Testing
 coverage/
 
+# Uploads
+uploads/
+
 # Misc
 *.tgz
 .cache/
