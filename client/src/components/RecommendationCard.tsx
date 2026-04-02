@@ -1,30 +1,56 @@
 import type { HeroRecommendation } from "../types/draft";
+import "./RecommendationCard.css";
 
 interface Props {
   recommendation: HeroRecommendation;
+  index: number;
 }
 
-export function RecommendationCard({ recommendation }: Props) {
+const roleColors: Record<string, string> = {
+  carry: "#fbbf24",
+  midlane: "#60a5fa",
+  offlane: "#f87171",
+  soft_support: "#4ade80",
+  hard_support: "#a78bfa",
+};
+
+export const RecommendationCard = ({ recommendation, index }: Props) => {
+  const color = roleColors[recommendation.role] || "#94a3b8";
+
   return (
     <div
-      className="recommendation-card"
-      style={{
-        border: "1px solid #333",
-        borderRadius: "8px",
-        padding: "16px",
-        marginBottom: "12px",
-      }}
+      className="rec-card"
+      style={{ animationDelay: `${index * 0.1}s` }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h4 style={{ margin: 0 }}>{recommendation.heroName}</h4>
-        <span style={{ fontSize: "14px", color: "#888" }}>
-          {recommendation.confidence}% confidence
-        </span>
+      <div className="rec-card-rank">#{index + 1}</div>
+
+      <div className="rec-card-content">
+        <div className="rec-card-header">
+          <h4 className="rec-card-hero">{recommendation.heroName}</h4>
+          <span className="rec-card-role" style={{ color, borderColor: color + "40" }}>
+            {recommendation.role.replace("_", " ")}
+          </span>
+        </div>
+
+        <p className="rec-card-reasoning">{recommendation.reasoning}</p>
+
+        <div className="rec-card-confidence">
+          <div className="rec-card-confidence-header">
+            <span>Confidence</span>
+            <span className="rec-card-confidence-value">{recommendation.confidence}%</span>
+          </div>
+          <div className="rec-card-confidence-track">
+            <div
+              className="rec-card-confidence-fill"
+              style={{
+                width: `${recommendation.confidence}%`,
+                background: recommendation.confidence >= 80 ? "var(--radiant)" :
+                  recommendation.confidence >= 60 ? "var(--gold)" : "var(--dire)",
+              }}
+            />
+          </div>
+        </div>
       </div>
-      <p style={{ fontSize: "14px", color: "#aaa", margin: "4px 0" }}>
-        Role: {recommendation.role}
-      </p>
-      <p style={{ margin: "8px 0 0" }}>{recommendation.reasoning}</p>
     </div>
   );
-}
+};

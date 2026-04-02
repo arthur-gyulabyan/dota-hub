@@ -1,18 +1,21 @@
 import type { DraftState, HeroRecommendation } from "../types/draft";
 import { apiPost, apiGet } from "./client";
 
-export function submitDraft(
+export const submitDraft = (
   userTeam: "radiant" | "dire",
   alliedPicks: string[],
   enemyPicks: string[]
-): Promise<DraftState> {
+): Promise<DraftState> => {
+
   return apiPost<DraftState>("/submit-draft", { userTeam, alliedPicks, enemyPicks });
-}
+};
 
-export function analyzeDraft(draftStateId: string): Promise<HeroRecommendation[]> {
+export const analyzeDraft = (draftStateId: string): Promise<HeroRecommendation[]> => {
+
   return apiPost<HeroRecommendation[]>("/analyze-draft", { draftStateId });
-}
+};
 
-export function getRecommendations(draftStateId: string): Promise<HeroRecommendation[]> {
+export const getRecommendations = (draftStateId: string): Promise<HeroRecommendation[]> => {
+
   return apiGet<HeroRecommendation[]>(`/recommendations/${draftStateId}`);
-}
+};

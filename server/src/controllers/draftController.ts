@@ -4,7 +4,7 @@ import { draftStates, recommendations } from "../store/inMemoryStore.js";
 import { analyzeDraft } from "../services/draftAnalysisService.js";
 import { DraftState } from "../models/types.js";
 
-export function submitDraft(req: Request, res: Response) {
+export const submitDraft = (req: Request, res: Response) => {
   const { userTeam, alliedPicks, enemyPicks } = req.body;
 
   if (!userTeam || !["radiant", "dire"].includes(userTeam)) {
@@ -31,9 +31,9 @@ export function submitDraft(req: Request, res: Response) {
 
   draftStates.set(draftState.id, draftState);
   res.status(201).json(draftState);
-}
+};
 
-export async function analyzeDraftController(req: Request, res: Response, next: NextFunction) {
+export const analyzeDraftController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { draftStateId } = req.body;
 
@@ -55,9 +55,9 @@ export async function analyzeDraftController(req: Request, res: Response, next: 
   } catch (err) {
     next(err);
   }
-}
+};
 
-export function getRecommendations(req: Request, res: Response) {
+export const getRecommendations = (req: Request, res: Response) => {
   const draftStateId = req.params.draftStateId as string;
   const recs = recommendations.get(draftStateId);
 
@@ -67,4 +67,4 @@ export function getRecommendations(req: Request, res: Response) {
   }
 
   res.json(recs);
-}
+};

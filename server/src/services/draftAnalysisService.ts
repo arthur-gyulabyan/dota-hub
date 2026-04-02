@@ -5,7 +5,7 @@ import { config } from "../config/env.js";
 
 const client = new Anthropic({ apiKey: config.anthropicApiKey });
 
-export async function analyzeDraft(draftState: DraftState): Promise<HeroRecommendation[]> {
+export const analyzeDraft = async (draftState: DraftState): Promise<HeroRecommendation[]> => {
   const prompt = `You are a Dota 2 expert analyst. Based on the following draft state, recommend 3-5 hero picks for the user's team.
 
 Draft State:
@@ -61,4 +61,4 @@ Respond ONLY with valid JSON array (no markdown, no explanation):
     confidence: rec.confidence,
     role: rec.role,
   }));
-}
+};

@@ -1,6 +1,6 @@
 const BASE_URL = "/api/v1";
 
-export async function apiPost<T>(path: string, body?: FormData | object): Promise<T> {
+export const apiPost = async <T>(path: string, body?: FormData | object): Promise<T> => {
   const isFormData = body instanceof FormData;
   const res = await fetch(`${BASE_URL}${path}`, {
     method: "POST",
@@ -14,9 +14,9 @@ export async function apiPost<T>(path: string, body?: FormData | object): Promis
   }
 
   return res.json();
-}
+};
 
-export async function apiGet<T>(path: string): Promise<T> {
+export const apiGet = async <T>(path: string): Promise<T> => {
   const res = await fetch(`${BASE_URL}${path}`);
 
   if (!res.ok) {
@@ -25,4 +25,4 @@ export async function apiGet<T>(path: string): Promise<T> {
   }
 
   return res.json();
-}
+};

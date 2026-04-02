@@ -73,3 +73,12 @@ Two entities: `DraftState` (userTeam, alliedPicks, enemyPicks) and `HeroRecommen
 - Client uses `type` imports for interfaces (`import type { ... }`)
 - Client tsconfig has `verbatimModuleSyntax` — type-only imports are enforced
 - Express 5 route params are `string | string[]` — cast with `as string`
+
+## Code Style
+
+- Arrow functions only — no `function` declarations (exceptions: class/object methods)
+- Always wrap parameters in parentheses, even single params: `(x) => ...` not `x => ...`
+- The last `return` statement in a function must be preceded by one empty line
+- No one-line `if` statements without braces — always use `{ }`
+- Always use semicolons
+- No section comments in JSX templates or CSS (no `{/* Header */}`, `/* ═══ Section ═══ */` etc.)

@@ -1,95 +1,138 @@
 import { useState } from "react";
-import { HeroSelector } from "../components/HeroSelector";
+import { DraftBoard } from "../components/DraftBoard";
 import { RecommendationList } from "../components/RecommendationList";
 import { useDraftAnalysis } from "../hooks/useDraftAnalysis";
+import { useHeroes } from "../hooks/useHeroes";
+import "./HomePage.css";
 
-const stepLabels: Record<string, string> = {
-  submitting: "Submitting draft...",
-  analyzing: "Analyzing draft with AI — this may take a moment...",
-};
-
-export function HomePage() {
+export const HomePage = () => {
+  const { heroes, loading: heroesLoading, error: heroesError } = useHeroes();
   const { step, recommendations, error, analyze, reset } = useDraftAnalysis();
   const [userTeam, setUserTeam] = useState<"radiant" | "dire">("radiant");
-  const [alliedPicks, setAlliedPicks] = useState<string[]>([]);
-  const [enemyPicks, setEnemyPicks] = useState<string[]>([]);
+  const [radiantPicks, setRadiantPicks] = useState<string[]>([]);
+  const [direPicks, setDirePicks] = useState<string[]>([]);
+
+  const alliedPicks = userTeam === "radiant" ? radiantPicks : direPicks;
+  const enemyPicks = userTeam === "radiant" ? direPicks : radiantPicks;
 
   const isProcessing = ["submitting", "analyzing"].includes(step);
-  const canAnalyze = (alliedPicks.length > 0 || enemyPicks.length > 0) && !isProcessing;
+  const canAnalyze = (radiantPicks.length > 0 || direPicks.length > 0) && !isProcessing;
 
-  function handleAnalyze() {
+  const handleAnalyze = () => {
     analyze(userTeam, alliedPicks, enemyPicks);
+  };
+
+  const handleReset = () => {
+    reset();
+    setRadiantPicks([]);
+    setDirePicks([]);
+  };
+
+  if (heroesLoading) {
+    return (
+      <div className="page-loading">
+        <div className="loading-spinner" />
+        <span>Loading heroes...</span>
+      </div>
+    );
   }
 
-  function handleReset() {
-    reset();
-    setAlliedPicks([]);
-    setEnemyPicks([]);
+  if (heroesError) {
+    return (
+      <div className="page-loading">
+        <span style={{ color: "var(--dire)" }}>Failed to load heroes: {heroesError}</span>
+      </div>
+    );
   }
 
   return (
-    <div style={{ maxWidth: "700px", margin: "0 auto", padding: "24px" }}>
-      <h1>Dota Hub — Best Pick</h1>
-      <p>Select the heroes already picked in your draft to get AI-powered recommendations.</p>
+    <div className="page">
+      
+      <header className="page-header">
+        <div className="page-logo">
+          <span className="logo-dota">DOTA</span>
+          <span className="logo-hub">HUB</span>
+        </div>
+        <p className="page-subtitle">AI-Powered Draft Analysis</p>
+      </header>
 
-      <div style={{ marginBottom: "16px" }}>
-        <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>Your Team</label>
-        <select
-          value={userTeam}
-          onChange={(e) => setUserTeam(e.target.value as "radiant" | "dire")}
-          style={{ padding: "6px" }}
-          disabled={isProcessing}
-        >
-          <option value="radiant">Radiant</option>
-          <option value="dire">Dire</option>
-        </select>
+
+      <div className="team-selector">
+        <span className="team-selector-label">Your team</span>
+        <div className="team-toggle">
+          <button
+            className={`team-toggle-btn radiant ${userTeam === "radiant" ? "active" : ""}`}
+            onClick={() => setUserTeam("radiant")}
+            disabled={isProcessing}
+          >
+            Radiant
+          </button>
+          <button
+            className={`team-toggle-btn dire ${userTeam === "dire" ? "active" : ""}`}
+            onClick={() => setUserTeam("dire")}
+            disabled={isProcessing}
+          >
+            Dire
+          </button>
+        </div>
       </div>
 
-      <HeroSelector
-        label="Allied Heroes"
-        picks={alliedPicks}
-        onChange={setAlliedPicks}
-        excludeHeroes={enemyPicks}
+
+      <DraftBoard
+        heroes={heroes}
+        userTeam={userTeam}
+        radiantPicks={radiantPicks}
+        direPicks={direPicks}
+        onRadiantChange={setRadiantPicks}
+        onDireChange={setDirePicks}
+        disabled={isProcessing}
       />
 
-      <HeroSelector
-        label="Enemy Heroes"
-        picks={enemyPicks}
-        onChange={setEnemyPicks}
-        excludeHeroes={alliedPicks}
-      />
 
-      <button
-        onClick={handleAnalyze}
-        disabled={!canAnalyze}
-        style={{
-          padding: "10px 24px",
-          fontSize: "16px",
-          cursor: canAnalyze ? "pointer" : "not-allowed",
-          opacity: canAnalyze ? 1 : 0.5,
-        }}
-      >
-        Analyze Draft
-      </button>
+      <div className="action-area">
+        {step === "done" ? (
+          <button className="btn btn-secondary" onClick={handleReset}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+              <polyline points="1 4 1 10 7 10" />
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+            </svg>
+            New Analysis
+          </button>
+        ) : (
+          <button
+            className={`btn btn-primary ${isProcessing ? "loading" : ""}`}
+            onClick={handleAnalyze}
+            disabled={!canAnalyze}
+          >
+            {isProcessing ? (
+              <>
+                <div className="btn-spinner" />
+                {step === "submitting" ? "Submitting..." : "Analyzing with AI..."}
+              </>
+            ) : (
+              <>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+                Analyze Draft
+              </>
+            )}
+          </button>
+        )}
+      </div>
 
-      {isProcessing && (
-        <p style={{ marginTop: "16px" }}>{stepLabels[step]}</p>
-      )}
 
       {error && (
-        <div style={{ color: "#ff4444", marginTop: "16px" }}>
-          <p>Error: {error}</p>
-          <button onClick={handleReset}>Try Again</button>
+        <div className="error-banner">
+          <span>{error}</span>
+          <button onClick={handleReset}>Retry</button>
         </div>
       )}
 
-      {recommendations.length > 0 && <RecommendationList recommendations={recommendations} />}
 
-      {step === "done" && (
-        <button onClick={handleReset} style={{ marginTop: "16px" }}>
-          Analyze Another Draft
-        </button>
+      {recommendations.length > 0 && (
+        <RecommendationList recommendations={recommendations} />
       )}
     </div>
   );
-}
+};

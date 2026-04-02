@@ -1,0 +1,106 @@
+.rec-card {
+  display: flex;
+  gap: 16px;
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.5), rgba(15, 20, 35, 0.8));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  backdrop-filter: blur(4px);
+  animation: stagger-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  transition: all 0.25s;
+}
+
+.rec-card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.7), rgba(15, 20, 35, 0.9));
+  transform: translateX(4px);
+}
+
+.rec-card-rank {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-muted);
+  min-width: 40px;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+  opacity: 0.5;
+}
+
+.rec-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.rec-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.rec-card-hero {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.rec-card-role {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid;
+  background: rgba(255, 255, 255, 0.02);
+  white-space: nowrap;
+}
+
+.rec-card-reasoning {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.rec-card-confidence {
+  max-width: 280px;
+}
+
+.rec-card-confidence-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.rec-card-confidence-header span {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rec-card-confidence-value {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  color: var(--text-secondary) !important;
+}
+
+.rec-card-confidence-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.rec-card-confidence-fill {
+  height: 100%;
+  border-radius: 2px;
+  animation: confidence-fill 0.8s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  animation-delay: inherit;
+}

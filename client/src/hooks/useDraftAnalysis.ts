@@ -11,7 +11,7 @@ interface DraftAnalysisState {
   error: string | null;
 }
 
-export function useDraftAnalysis() {
+export const useDraftAnalysis = () => {
   const [state, setState] = useState<DraftAnalysisState>({
     step: "idle",
     draftState: null,
@@ -19,7 +19,7 @@ export function useDraftAnalysis() {
     error: null,
   });
 
-  async function analyze(userTeam: "radiant" | "dire", alliedPicks: string[], enemyPicks: string[]) {
+  const analyze = async (userTeam: "radiant" | "dire", alliedPicks: string[], enemyPicks: string[]) => {
     try {
       setState((s) => ({ ...s, step: "submitting", error: null }));
       const draftState = await submitDraft(userTeam, alliedPicks, enemyPicks);
@@ -35,16 +35,16 @@ export function useDraftAnalysis() {
         error: err instanceof Error ? err.message : "Something went wrong",
       }));
     }
-  }
+  };
 
-  function reset() {
+  const reset = () => {
     setState({
       step: "idle",
       draftState: null,
       recommendations: [],
       error: null,
     });
-  }
+  };
 
   return { ...state, analyze, reset };
-}
+};
