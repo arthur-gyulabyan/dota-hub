@@ -11,7 +11,7 @@ interface Props {
   direPicks: string[];
   onRadiantChange: (picks: string[]) => void;
   onDireChange: (picks: string[]) => void;
-  excludeHeroes?: string[];
+  bannedHeroes?: string[];
   disabled?: boolean;
 }
 
@@ -22,12 +22,12 @@ export const DraftBoard = ({
   direPicks,
   onRadiantChange,
   onDireChange,
-  excludeHeroes = [],
+  bannedHeroes = [],
   disabled,
 }: Props) => {
   const [pickerSlot, setPickerSlot] = useState<{ side: "radiant" | "dire"; index: number } | null>(null);
 
-  const allSelected = [...radiantPicks, ...direPicks, ...excludeHeroes];
+  const allSelected = [...radiantPicks, ...direPicks, ...bannedHeroes];
 
   const findHero = (name: string): Hero | undefined => {
 
@@ -136,6 +136,7 @@ export const DraftBoard = ({
         <HeroPicker
           heroes={heroes}
           excludeHeroes={allSelected}
+          bannedHeroes={bannedHeroes}
           onSelect={handleHeroSelect}
           onClose={() => setPickerSlot(null)}
         />

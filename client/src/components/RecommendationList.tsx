@@ -4,9 +4,10 @@ import "./RecommendationList.css";
 
 interface Props {
   recommendations: HeroRecommendation[];
+  onSelectHero?: (recommendation: HeroRecommendation) => void;
 }
 
-export const RecommendationList = ({ recommendations }: Props) => {
+export const RecommendationList = ({ recommendations, onSelectHero }: Props) => {
   if (recommendations.length === 0) {
     return null;
   }
@@ -23,7 +24,12 @@ export const RecommendationList = ({ recommendations }: Props) => {
         <div className="rec-list-divider" />
       </div>
       {recommendations.map((rec, i) => (
-        <RecommendationCard key={rec.id} recommendation={rec} index={i} />
+        <RecommendationCard
+          key={rec.id}
+          recommendation={rec}
+          index={i}
+          onClick={onSelectHero ? () => onSelectHero(rec) : undefined}
+        />
       ))}
     </div>
   );

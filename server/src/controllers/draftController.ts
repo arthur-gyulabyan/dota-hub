@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { draftStates, recommendations } from "../store/inMemoryStore.js";
 import { analyzeDraft } from "../services/draftAnalysisService.js";
-import { DraftState } from "../models/types.js";
+import { suggestItemBuild } from "../services/itemBuildService.js";
+import { DraftState, ItemBuildRequest } from "../models/types.js";
 
 export const submitDraft = (req: Request, res: Response) => {
   const { userTeam, alliedPicks, enemyPicks, bans = [] } = req.body;
@@ -68,4 +69,21 @@ export const getRecommendations = (req: Request, res: Response) => {
   }
 
   res.json(recs);
+};
+
+export const suggestItemsController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const body = req.body as ItemBuildRequest;
+
+    if (!body.heroName || !body.role) {
+      res.status(400).json({ message: "heroName and role are required" });
+      return;
+    }
+
+    const suggestions = await suggestItemBuild(body);
+
+    res.json(suggestions);
+  } catch (err) {
+    next(err);
+  }
 };

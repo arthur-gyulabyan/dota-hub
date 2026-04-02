@@ -7,7 +7,9 @@ export const useHeroes = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("https://api.opendota.com/api/heroStats")
+    const controller = new AbortController();
+
+    fetch("https://api.opendota.com/api/heroStats", { signal: controller.signal })
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch heroes");
@@ -20,9 +22,14 @@ export const useHeroes = () => {
         setLoading(false);
       })
       .catch((err) => {
+        if (err.name === "AbortError") {
+          return;
+        }
         setError(err.message);
         setLoading(false);
       });
+
+    return () => controller.abort();
   }, []);
 
   return { heroes, loading, error };

@@ -14,3 +14,9 @@ export interface HeroRecommendation {
   confidence: number;
   role: string;
 }
+
+export interface ItemSuggestion {
+  phase: "starting" | "early" | "core" | "luxury";
+  items: string[];
+  reasoning: string;
+}

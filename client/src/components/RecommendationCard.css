@@ -67,8 +67,44 @@
   margin-bottom: 12px;
 }
 
+.rec-card-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 .rec-card-confidence {
   max-width: 280px;
+  flex: 1;
+}
+
+.rec-card-items-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 6px;
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.rec-card-items-btn:hover {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.4);
+  box-shadow: 0 0 12px -4px var(--gold-glow);
+}
+
+.rec-card-items-btn svg {
+  opacity: 0.8;
 }
 
 .rec-card-confidence-header {

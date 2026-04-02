@@ -6,11 +6,12 @@ import "./HeroPicker.css";
 interface Props {
   heroes: Hero[];
   excludeHeroes: string[];
+  bannedHeroes?: string[];
   onSelect: (heroName: string) => void;
   onClose: () => void;
 }
 
-export const HeroPicker = ({ heroes, excludeHeroes, onSelect, onClose }: Props) => {
+export const HeroPicker = ({ heroes, excludeHeroes, bannedHeroes = [], onSelect, onClose }: Props) => {
   const [search, setSearch] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -69,14 +70,16 @@ export const HeroPicker = ({ heroes, excludeHeroes, onSelect, onClose }: Props) 
               <div className={`hero-attr-label attr-${attr}`}>{label}</div>
               <div className="hero-attr-heroes">
                 {group.map((hero) => {
-                  const disabled = excludeHeroes.includes(hero.localized_name);
+                  const picked = excludeHeroes.includes(hero.localized_name);
+                  const banned = bannedHeroes.includes(hero.localized_name);
+                  const disabled = picked || banned;
                   const matches = matchesSearch(hero);
                   const dimmed = search && !matches;
 
                   return (
                     <div
                       key={hero.id}
-                      className={`hero-pick-item ${disabled ? "disabled" : ""} ${matches && search ? "search-match" : ""} ${dimmed ? "search-dimmed" : ""}`}
+                      className={`hero-pick-item ${picked ? "picked" : ""} ${banned ? "banned" : ""} ${matches && search ? "search-match" : ""} ${dimmed ? "search-dimmed" : ""}`}
                       onClick={() => !disabled && !dimmed && onSelect(hero.localized_name)}
                     >
                       <img

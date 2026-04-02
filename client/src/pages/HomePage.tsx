@@ -1,18 +1,23 @@
 import { useState } from "react";
+import type { HeroRecommendation } from "../types/draft";
 import { DraftBoard } from "../components/DraftBoard";
 import { BansList } from "../components/BansList";
 import { RecommendationList } from "../components/RecommendationList";
+import { ItemBuild } from "../components/ItemBuild";
 import { useDraftAnalysis } from "../hooks/useDraftAnalysis";
 import { useHeroes } from "../hooks/useHeroes";
+import { useItems } from "../hooks/useItems";
 import "./HomePage.css";
 
 export const HomePage = () => {
   const { heroes, loading: heroesLoading, error: heroesError } = useHeroes();
+  const { items, loading: itemsLoading } = useItems();
   const { step, recommendations, error, analyze, reset } = useDraftAnalysis();
   const [userTeam, setUserTeam] = useState<"radiant" | "dire">("radiant");
   const [radiantPicks, setRadiantPicks] = useState<string[]>([]);
   const [direPicks, setDirePicks] = useState<string[]>([]);
   const [bans, setBans] = useState<string[]>([]);
+  const [selectedRec, setSelectedRec] = useState<HeroRecommendation | null>(null);
 
   const alliedPicks = userTeam === "radiant" ? radiantPicks : direPicks;
   const enemyPicks = userTeam === "radiant" ? direPicks : radiantPicks;
@@ -32,7 +37,7 @@ export const HomePage = () => {
     setBans([]);
   };
 
-  if (heroesLoading) {
+  if (heroesLoading || itemsLoading) {
     return (
       <div className="page-loading">
         <div className="loading-spinner" />
@@ -89,7 +94,7 @@ export const HomePage = () => {
         direPicks={direPicks}
         onRadiantChange={setRadiantPicks}
         onDireChange={setDirePicks}
-        excludeHeroes={bans}
+        bannedHeroes={bans}
         disabled={isProcessing}
       />
 
@@ -143,7 +148,23 @@ export const HomePage = () => {
 
 
       {recommendations.length > 0 && (
-        <RecommendationList recommendations={recommendations} />
+        <RecommendationList
+          recommendations={recommendations}
+          onSelectHero={setSelectedRec}
+        />
+      )}
+
+      {selectedRec && (
+        <ItemBuild
+          recommendation={selectedRec}
+          heroes={heroes}
+          items={items}
+          alliedPicks={alliedPicks}
+          enemyPicks={enemyPicks}
+          bans={bans}
+          userTeam={userTeam}
+          onClose={() => setSelectedRec(null)}
+        />
       )}
     </div>
   );

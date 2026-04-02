@@ -1,11 +1,12 @@
 const BASE_URL = "/api/v1";
 
-export const apiPost = async <T>(path: string, body?: FormData | object): Promise<T> => {
+export const apiPost = async <T>(path: string, body?: FormData | object, signal?: AbortSignal): Promise<T> => {
   const isFormData = body instanceof FormData;
   const res = await fetch(`${BASE_URL}${path}`, {
     method: "POST",
     headers: isFormData ? undefined : { "Content-Type": "application/json" },
     body: isFormData ? body : JSON.stringify(body),
+    signal,
   });
 
   if (!res.ok) {
@@ -16,8 +17,8 @@ export const apiPost = async <T>(path: string, body?: FormData | object): Promis
   return res.json();
 };
 
-export const apiGet = async <T>(path: string): Promise<T> => {
-  const res = await fetch(`${BASE_URL}${path}`);
+export const apiGet = async <T>(path: string, signal?: AbortSignal): Promise<T> => {
+  const res = await fetch(`${BASE_URL}${path}`, { signal });
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: "Request failed" }));
