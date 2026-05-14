@@ -28,13 +28,11 @@ export const BansList = ({ heroes, bans, onChange, excludeHeroes, disabled }: Pr
     <div className="bans-section">
       <div className="bans-header">
         <span className="bans-label">Bans</span>
-        {!disabled && (
-          <button className="bans-add-btn" onClick={() => setShowPicker(true)}>
-            + Add Ban
-          </button>
-        )}
-        {bans.length > 0 && !disabled && (
-          <button className="bans-clear-btn" onClick={() => onChange([])}>
+        <button className="bans-add-btn" onClick={() => setShowPicker(true)} disabled={disabled}>
+          + Add Ban
+        </button>
+        {bans.length > 0 && (
+          <button className="bans-clear-btn" onClick={() => onChange([])} disabled={disabled}>
             Clear all
           </button>
         )}

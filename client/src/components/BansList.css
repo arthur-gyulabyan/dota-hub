@@ -30,10 +30,16 @@
   transition: all 0.2s;
 }
 
-.bans-add-btn:hover {
+.bans-add-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.15);
   color: var(--text-primary);
+}
+
+.bans-add-btn:disabled,
+.bans-clear-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .bans-clear-btn {

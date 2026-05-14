@@ -17,7 +17,9 @@ Separate client and server packages (no workspace). Each has its own `package.js
 ### Server layers
 `routes/` → `controllers/` → `services/` → `store/`
 
-The AI integration lives in `services/draftAnalysisService.ts` using `@anthropic-ai/sdk` with `claude-sonnet-4-6` and extended thinking enabled.
+Two AI services, both using `@anthropic-ai/sdk` with `claude-sonnet-4-6` and extended thinking enabled:
+- `services/draftAnalysisService.ts` — generates hero pick recommendations
+- `services/itemBuildService.ts` — generates situational item builds (incorporates OpenDota popularity stats sent by the client)
 
 Data is stored in-memory (`store/inMemoryStore.ts`) — no database yet.
 
@@ -26,7 +28,7 @@ Data is stored in-memory (`store/inMemoryStore.ts`) — no database yet.
 
 State management via `useDraftAnalysis` hook (state machine: idle → submitting → analyzing → done/error). API calls go through typed wrappers in `api/client.ts`.
 
-Hero list is in `data/heroes.ts`.
+Hero list and item constants are fetched at runtime from OpenDota (`useHeroes`, `useItems` hooks) — `api.opendota.com/api/heroStats` and `/api/constants/items`. There is no local hero data file.
 
 ## Build & Run
 
@@ -57,15 +59,16 @@ cd client && npm run lint        # eslint
 ## API Endpoints
 
 All under `/api/v1`:
-- `POST /submit-draft` — `{ userTeam, alliedPicks, enemyPicks }` → DraftState
+- `POST /submit-draft` — `{ userTeam, alliedPicks, enemyPicks, bans }` → DraftState
 - `POST /analyze-draft` — `{ draftStateId }` → HeroRecommendation[]
 - `GET /recommendations/:draftStateId` → HeroRecommendation[]
+- `POST /suggest-items` — `{ heroName, role, alliedPicks, enemyPicks, bans, userTeam, popularItems }` → ItemSuggestion[] (phase ∈ starting | early | core | luxury)
 
 ## Domain Model
 
 Managed in Qlerify (project "Dota Hub", workflow "Best Pick", bounded context "Draft Analysis"). The source of truth for entities and API contracts is in `docs/`.
 
-Two entities: `DraftState` (userTeam, alliedPicks, enemyPicks) and `HeroRecommendation` (heroName, reasoning, confidence, role).
+Entities: `DraftState` (userTeam, alliedPicks, enemyPicks, bans) and `HeroRecommendation` (heroName, reasoning, confidence, role). Item suggestions are stateless — not persisted.
 
 ## Conventions
 
