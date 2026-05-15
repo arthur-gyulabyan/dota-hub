@@ -1,79 +1,49 @@
-import { useState } from "react";
 import type { Hero } from "../types/hero";
 import { getHeroImageUrl } from "../types/hero";
-import { HeroPicker } from "./HeroPicker";
 import "./BansList.css";
 
 interface Props {
   heroes: Hero[];
   bans: string[];
-  onChange: (bans: string[]) => void;
-  excludeHeroes: string[];
+  onAdd: () => void;
+  onRemove: (name: string) => void;
   disabled?: boolean;
 }
 
-export const BansList = ({ heroes, bans, onChange, excludeHeroes, disabled }: Props) => {
-  const [showPicker, setShowPicker] = useState(false);
-
+export const BansList = ({ heroes, bans, onAdd, onRemove, disabled }: Props) => {
   const findHero = (name: string): Hero | undefined => {
 
     return heroes.find((h) => h.localized_name === name);
   };
 
-  const handleRemove = (name: string) => {
-    onChange(bans.filter((b) => b !== name));
-  };
-
   return (
-    <div className="bans-section">
-      <div className="bans-header">
-        <span className="bans-label">Bans</span>
-        <button className="bans-add-btn" onClick={() => setShowPicker(true)} disabled={disabled}>
-          + Add Ban
-        </button>
-        {bans.length > 0 && (
-          <button className="bans-clear-btn" onClick={() => onChange([])} disabled={disabled}>
-            Clear all
-          </button>
-        )}
+    <div className="bans-rail">
+      <span className="bans-title">
+        Bans
+        <span className="bans-title-count">{bans.length}/14</span>
+      </span>
+      <span className="bans-divider" />
+      <div className="bans-list">
+        {bans.map((name) => {
+          const hero = findHero(name);
+
+          return (
+            <div key={name} className="ban-chip" title={name}>
+              {hero && <img src={getHeroImageUrl(hero.img)} alt={name} />}
+              {!disabled && (
+                <button
+                  className="ban-remove"
+                  onClick={() => onRemove(name)}
+                  aria-label={`Remove ban ${name}`}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          );
+        })}
+        <button className="bans-add" onClick={onAdd} disabled={disabled}>+ Ban hero</button>
       </div>
-
-      {bans.length > 0 && (
-        <div className="bans-list">
-          {bans.map((name) => {
-            const hero = findHero(name);
-
-            return (
-              <div key={name} className="ban-item">
-                {hero && (
-                  <img src={getHeroImageUrl(hero.img)} alt={name} />
-                )}
-                <span className="ban-item-name">{name}</span>
-                <div className="ban-cross" />
-                {!disabled && (
-                  <button
-                    className="ban-item-remove"
-                    onClick={() => handleRemove(name)}
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {showPicker && (
-        <HeroPicker
-          heroes={heroes}
-          excludeHeroes={excludeHeroes}
-          onSelect={(heroName) => {
-            onChange([...bans, heroName]);
-          }}
-          onClose={() => setShowPicker(false)}
-        />
-      )}
     </div>
   );
 };

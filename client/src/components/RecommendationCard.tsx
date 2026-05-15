@@ -1,70 +1,64 @@
+import type { Hero } from "../types/hero";
+import { getHeroImageUrl, ROLE_COLORS, ROLE_LABELS, type Role } from "../types/hero";
 import type { HeroRecommendation } from "../types/draft";
 import "./RecommendationCard.css";
 
 interface Props {
+  heroes: Hero[];
   recommendation: HeroRecommendation;
   index: number;
-  onClick?: () => void;
+  onOpenItems: () => void;
 }
 
-const roleColors: Record<string, string> = {
-  carry: "#fbbf24",
-  midlane: "#60a5fa",
-  offlane: "#f87171",
-  soft_support: "#4ade80",
-  hard_support: "#a78bfa",
-};
-
-export const RecommendationCard = ({ recommendation, index, onClick }: Props) => {
-  const color = roleColors[recommendation.role] || "#94a3b8";
+export const RecommendationCard = ({ heroes, recommendation, index, onOpenItems }: Props) => {
+  const hero = heroes.find((h) => h.localized_name === recommendation.heroName);
+  const role = recommendation.role as Role;
+  const roleColor = ROLE_COLORS[role] || "var(--text-tertiary)";
+  const roleLabel = ROLE_LABELS[role] || recommendation.role.replace("_", " ");
+  const confColor =
+    recommendation.confidence >= 80 ? "var(--radiant-bright)" :
+    recommendation.confidence >= 65 ? "var(--gold)" : "var(--dire-bright)";
 
   return (
-    <div
-      className="rec-card"
-      style={{ animationDelay: `${index * 0.1}s` }}
-    >
-      <div className="rec-card-rank">#{index + 1}</div>
-
-      <div className="rec-card-content">
-        <div className="rec-card-header">
-          <h4 className="rec-card-hero">{recommendation.heroName}</h4>
-          <span className="rec-card-role" style={{ color, borderColor: color + "40" }}>
-            {recommendation.role.replace("_", " ")}
-          </span>
+    <div className="rec-card" style={{ animationDelay: `${index * 80}ms` }}>
+      <div className="rec-top">
+        <div className="rec-portrait">
+          {hero && <img src={getHeroImageUrl(hero.img)} alt={hero.localized_name} />}
         </div>
+        <div className="rec-name-col">
+          <div className="rec-name">{recommendation.heroName}</div>
+          <span className="rec-role" style={{ color: roleColor }}>{roleLabel}</span>
+        </div>
+      </div>
 
-        <p className="rec-card-reasoning">{recommendation.reasoning}</p>
+      <p className="rec-reasoning">{recommendation.reasoning}</p>
 
-        <div className="rec-card-footer">
-          <div className="rec-card-confidence">
-            <div className="rec-card-confidence-header">
-              <span>Confidence</span>
-              <span className="rec-card-confidence-value">{recommendation.confidence}%</span>
-            </div>
-            <div className="rec-card-confidence-track">
-              <div
-                className="rec-card-confidence-fill"
-                style={{
-                  width: `${recommendation.confidence}%`,
-                  background: recommendation.confidence >= 80 ? "var(--radiant)" :
-                    recommendation.confidence >= 60 ? "var(--gold)" : "var(--dire)",
-                }}
-              />
-            </div>
+      <div className="rec-footer">
+        <div className="rec-conf">
+          <div className="rec-conf-row">
+            <span className="rec-conf-label">Confidence</span>
+            <span className="rec-conf-value">{recommendation.confidence}%</span>
           </div>
-
-          {onClick && (
-            <button className="rec-card-items-btn" onClick={onClick}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
-                <rect x="3" y="3" width="7" height="7" />
-                <rect x="14" y="3" width="7" height="7" />
-                <rect x="3" y="14" width="7" height="7" />
-                <rect x="14" y="14" width="7" height="7" />
-              </svg>
-              Item Build
-            </button>
-          )}
+          <div className="rec-conf-track">
+            <div
+              className="rec-conf-fill"
+              style={{
+                width: `${recommendation.confidence}%`,
+                background: confColor,
+                animationDelay: `${index * 80 + 120}ms`,
+              }}
+            />
+          </div>
         </div>
+        <button className="rec-action-btn" onClick={onOpenItems}>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
+          Items
+        </button>
       </div>
     </div>
   );

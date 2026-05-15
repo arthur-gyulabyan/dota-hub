@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { HeroRecommendation, ItemSuggestion } from "../types/draft";
 import type { Hero } from "../types/hero";
 import type { ItemsMap } from "../types/item";
+import { getHeroImageUrl, ROLE_LABELS, type Role } from "../types/hero";
 import { fetchItemPopularity, suggestItems, getItemImageUrl } from "../api/draftApi";
 import "./ItemBuild.css";
 
@@ -16,14 +17,12 @@ interface Props {
   onClose: () => void;
 }
 
-const phaseLabels: Record<string, string> = {
-  starting: "Starting",
-  early: "Early Game",
-  core: "Core",
-  luxury: "Luxury / Situational",
-};
-
-const phaseOrder = ["starting", "early", "core", "luxury"];
+const PHASE_META: { key: ItemSuggestion["phase"]; label: string; range: string }[] = [
+  { key: "starting", label: "Starting", range: "0:00 – 2:00" },
+  { key: "early", label: "Early Game", range: "2:00 – 10:00" },
+  { key: "core", label: "Core", range: "10:00 – 25:00" },
+  { key: "luxury", label: "Luxury / Situational", range: "25:00+" },
+];
 
 export const ItemBuild = ({
   recommendation,
@@ -35,16 +34,27 @@ export const ItemBuild = ({
   userTeam,
   onClose,
 }: Props) => {
+  const hero = heroes.find((h) => h.localized_name === recommendation.heroName);
   const [suggestions, setSuggestions] = useState<ItemSuggestion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(!!hero);
+  const [error, setError] = useState<string | null>(hero ? null : "Hero not found");
+  const role = recommendation.role as Role;
+  const roleLabel = ROLE_LABELS[role] || recommendation.role;
+  const generated = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   useEffect(() => {
-    const hero = heroes.find((h) => h.localized_name === recommendation.heroName);
-    if (!hero) {
-      setError("Hero not found");
-      setLoading(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKey);
 
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!hero) {
       return;
     }
 
@@ -78,51 +88,68 @@ export const ItemBuild = ({
     run();
 
     return () => controller.abort();
-  }, [recommendation, heroes, items, alliedPicks, enemyPicks, bans, userTeam]);
+  }, [hero, recommendation, items, alliedPicks, enemyPicks, bans, userTeam]);
+
+  const byPhase = new Map(suggestions.map((s) => [s.phase, s]));
 
   return (
-    <div className="item-build-overlay" onClick={onClose}>
-      <div className="item-build-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="item-build-header">
-          <div>
-            <h3>{recommendation.heroName}</h3>
-            <span className="item-build-role">{recommendation.role.replace("_", " ")}</span>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="item-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="item-top">
+          <div className="item-top-portrait">
+            {hero && <img src={getHeroImageUrl(hero.img)} alt={hero.localized_name} />}
           </div>
-          <button className="item-build-close" onClick={onClose}>✕</button>
+          <div className="item-top-text">
+            <div className="item-top-title">{recommendation.heroName}</div>
+            <div className="item-top-sub">
+              {roleLabel} · Situational build · Generated {generated}
+            </div>
+          </div>
+          <button className="picker-close" onClick={onClose} aria-label="Close">✕</button>
         </div>
 
-        <div className="item-build-content">
+        <div className="item-body">
           {loading && (
-            <div className="item-build-loading">
-              <div className="loading-spinner" />
-              <span>Generating situational item build...</span>
+            <div className="item-loading">
+              <div className="analyzing-dots"><span /><span /><span /></div>
+              <div className="analyzing-text">Building situational items…</div>
             </div>
           )}
 
-          {error && (
-            <div className="item-build-error">{error}</div>
-          )}
+          {error && <div className="item-error">{error}</div>}
 
-          {!loading && !error && suggestions
-            .sort((a, b) => phaseOrder.indexOf(a.phase) - phaseOrder.indexOf(b.phase))
-            .map((s) => (
-              <div key={s.phase} className="item-phase">
-                <div className="item-phase-label">{phaseLabels[s.phase] || s.phase}</div>
-                <div className="item-phase-items">
-                  {s.items.map((itemName, i) => {
-                    const imgUrl = getItemImageUrl(items, itemName);
+          {!loading && !error && PHASE_META.map((p) => {
+            const data = byPhase.get(p.key);
+            if (!data) {
+              return null;
+            }
 
-                    return (
-                      <div key={`${itemName}-${i}`} className="item-chip" title={itemName}>
-                        {imgUrl && <img src={imgUrl} alt={itemName} />}
-                        <span>{itemName}</span>
-                      </div>
-                    );
-                  })}
+            return (
+              <div key={p.key} className="item-phase">
+                <div className="item-phase-col">
+                  <span className="item-phase-label">{p.label}</span>
+                  <span className="item-phase-range">{p.range}</span>
                 </div>
-                <p className="item-phase-reasoning">{s.reasoning}</p>
+                <div className="item-phase-content">
+                  <div className="item-chips">
+                    {data.items.map((itemName, i) => {
+                      const imgUrl = getItemImageUrl(items, itemName);
+
+                      return (
+                        <span key={`${itemName}-${i}`} className="item-chip" title={itemName}>
+                          <span className="item-icon">
+                            {imgUrl ? <img src={imgUrl} alt={itemName} /> : itemName.slice(0, 2).toUpperCase()}
+                          </span>
+                          {itemName}
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <p className="item-phase-note">{data.reasoning}</p>
+                </div>
               </div>
-            ))}
+            );
+          })}
         </div>
       </div>
     </div>
